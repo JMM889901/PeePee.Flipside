@@ -1,0 +1,19 @@
+{
+	"Name" : "Flipside",
+	"Description" : "Flipside Gamemode",
+	"Version": "0.1.0",
+	"LoadPriority": 5,
+	"Scripts": [
+		{
+			"Path": "flipside.gnut",
+			"RunOn": "MP",
+			"ClientCallback": {
+				"After": "flipside_init"
+			},
+
+			"ServerCallback": {
+				"After": "flipside_init"
+			}
+		}
+    ]
+}

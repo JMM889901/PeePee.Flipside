@@ -1,0 +1,37 @@
+global function flipside_init
+void function flipside_init() {
+	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_FLIPSIDE", "Flipside", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+	#if SERVER
+		AddCallback_OnPlayerRespawned(OnPlayerRespawn)
+        AddClientCommandCallback("!Stuck", UnstuckPlayer)
+        AddCallback_PlayerClassChanged(OnPlayerRespawn)
+	#endif
+}
+bool function FlipsideEnabled(){
+    return GetCurrentPlaylistVarInt("Flipside", 0) == 1
+}
+#if SERVER
+void function OnPlayerRespawn(entity player){
+    if(FlipsideEnabled()){
+		if(player.GetOffhandWeapons().len() != 0){
+	        if(!player.IsTitan() && !PlayerHasWeapon( player, "mp_ability_shifter_super" )){
+                player.TakeWeaponNow(player.GetOffhandWeapons()[OFFHAND_RIGHT].GetWeaponClassName())
+                player.GiveOffhandWeapon("mp_ability_shifter_super", OFFHAND_RIGHT)}
+	else if(player.IsTitan() && !PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
+	player.TakeWeaponNow(player.GetOffhandWeapons()[2].GetWeaponClassName())
+        player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])}
+    else if(player.IsTitan() && PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
+        if(!player.GetOffhandWeapons()[2].HasMod("fd_phase_charges")){
+            player.TakeWeaponNow("mp_titanability_phase_dash")
+            player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])
+        }
+    }
+	}
+    }
+}
+bool function UnstuckPlayer(entity player, array<string> args){
+    print("Player " + player.GetUID + " Used Unstuck at " + player.GetOrigin())
+    player.SetOrigin(<1000,1000,100>)
+    return true
+}
+#endif
