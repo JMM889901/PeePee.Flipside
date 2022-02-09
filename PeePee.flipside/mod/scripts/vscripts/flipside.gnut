@@ -19,11 +19,11 @@ void function OnPlayerRespawn(entity player){
                 player.GiveOffhandWeapon("mp_ability_shifter_super", OFFHAND_RIGHT)}
 	else if(player.IsTitan() && !PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
 	player.TakeWeaponNow(player.GetOffhandWeapons()[2].GetWeaponClassName())
-        player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])}
+        player.GiveOffhandWeapon("mp_titanability_phase_dash", 1, ["fd_phase_charges"])}
     else if(player.IsTitan() && PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
         if(!player.GetOffhandWeapons()[2].HasMod("fd_phase_charges")){
             player.TakeWeaponNow("mp_titanability_phase_dash")
-            player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])
+            player.GiveOffhandWeapon("mp_titanability_phase_dash", 1, ["fd_phase_charges"])
         }
     }
 	}
