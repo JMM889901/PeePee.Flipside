@@ -14,7 +14,7 @@ var function OnWeaponPrimaryAttack_shifter_super( entity weapon, WeaponPrimaryAt
     vector origin = weaponOwner.GetOrigin()
         vector TargetPos = < -210+(-210-origin.x), 130+(130-origin.y), origin.z+10>
         if(PlayerPosInSolid(weaponOwner, TargetPos)){
-            TargetPos = FindNearestSafeTeleport(weaponOwner, TargetPos, 10)
+            TargetPos = FindNearestSafeTeleport(weaponOwner, TargetPos, 1)
             }
         weaponOwner.SetOrigin(TargetPos)
         vector Angles = weaponOwner.GetAngles()
@@ -85,32 +85,7 @@ bool function PlayerPosInSolid( entity player, vector targetPos )
     return false
 
 }
-vector function FindNearestSafeTeleport(entity player, vector targetPos, int severity){
-    if(severity >= 500){
-        print("problem")
-       return <1000,1000,100>
-    }
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z+severity> ))
-        return <targetPos.x, targetPos.y, targetPos.z+severity>
 
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z-severity> ))
-        return <targetPos.x, targetPos.y, targetPos.z-severity>
-
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y+severity, targetPos.z> ))
-        return <targetPos.x, targetPos.y+severity, targetPos.z>
-
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y-severity, targetPos.z> ))
-        return <targetPos.x, targetPos.y-severity, targetPos.z>
-
-        
-    if(!PlayerPosInSolid( player, <targetPos.x+severity, targetPos.y, targetPos.z> ))
-        return <targetPos.x+severity, targetPos.y, targetPos.z>
-
-    if(!PlayerPosInSolid( player, <targetPos.x-severity, targetPos.y, targetPos.z> ))
-        return <targetPos.x-severity, targetPos.y, targetPos.z>
-
-    return FindNearestSafeTeleport(player, targetPos, severity+10)
-}
 //script GetPlayerArray()[0].SetOrigin(< -205 + (-205.0 - GetPlayerArray()[0].GetOrigin().x), 127 + (127 - GetPlayerArray()[0].GetOrigin().y) ,500>)
 //script GetPlayerArray()[0].SetAngles(<0,(180-GetPlayerArray()[0].GetAngles().y),(180-GetPlayerArray()[0].GetAngles().z)>)
 /*

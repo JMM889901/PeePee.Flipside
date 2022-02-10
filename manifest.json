@@ -1,9 +1,8 @@
 {
     "name": "FlipSide",
-    "version_number": "0.2.0",
+    "version_number": "0.2.1",
     "website_url": "https://github.com/JMM889901/PeePee.Flipside",
-    "description": "Adds the flipside mode, to make it serverside only this is done as a modifier not a gamemode and can be toggled from the settings. when toggled off the weapon .nut changes will not take effect",
+    "description": "Adds the flipside mode, to make it serverside only this is done as a modifier not a gamemode and can be toggled from the settings. Only works on glitch and will break on other maps. when toggled off the weapon .nut changes will not take effect",
     "dependencies": [
-        "northstar client"
-    ]
+    ]    
 }

@@ -1,4 +1,5 @@
 global function flipside_init
+global function FindNearestSafeTeleport
 void function flipside_init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_FLIPSIDE", "Flipside", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
 	#if SERVER
@@ -19,11 +20,11 @@ void function OnPlayerRespawn(entity player){
                 player.GiveOffhandWeapon("mp_ability_shifter_super", OFFHAND_RIGHT)}
 	else if(player.IsTitan() && !PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
 	player.TakeWeaponNow(player.GetOffhandWeapons()[2].GetWeaponClassName())
-        player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])}
+        player.GiveOffhandWeapon("mp_titanability_phase_dash", 1, ["fd_phase_charges"])}
     else if(player.IsTitan() && PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
         if(!player.GetOffhandWeapons()[2].HasMod("fd_phase_charges")){
             player.TakeWeaponNow("mp_titanability_phase_dash")
-            player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])
+            player.GiveOffhandWeapon("mp_titanability_phase_dash", 1, ["fd_phase_charges"])
         }
     }
 	}
@@ -33,5 +34,32 @@ bool function UnstuckPlayer(entity player, array<string> args){
     print("Player " + player.GetUID + " Used Unstuck at " + player.GetOrigin())
     player.SetOrigin(<1000,1000,100>)
     return true
+}
+
+vector function FindNearestSafeTeleport(entity player, vector targetPos, int severity){
+    if(severity >= 500){
+        print("problem")
+       return <1000,1000,100>
+    }
+    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z+severity> ))
+        return <targetPos.x, targetPos.y, targetPos.z+severity>
+
+    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z-severity> ))
+        return <targetPos.x, targetPos.y, targetPos.z-severity>
+
+    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y+severity, targetPos.z> ))
+        return <targetPos.x, targetPos.y+severity, targetPos.z>
+
+    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y-severity, targetPos.z> ))
+        return <targetPos.x, targetPos.y-severity, targetPos.z>
+
+        
+    if(!PlayerPosInSolid( player, <targetPos.x+severity, targetPos.y, targetPos.z> ))
+        return <targetPos.x+severity, targetPos.y, targetPos.z>
+
+    if(!PlayerPosInSolid( player, <targetPos.x-severity, targetPos.y, targetPos.z> ))
+        return <targetPos.x-severity, targetPos.y, targetPos.z>
+
+    return FindNearestSafeTeleport(player, targetPos, severity+1)
 }
 #endif

@@ -133,29 +133,3 @@ bool function PlayerPosInSolid( entity player, vector targetPos )
     return false
 
 }
-vector function FindNearestSafeTeleport(entity player, vector targetPos, int severity){
-    if(severity >= 500){
-        print("problem")
-       return <1000,1000,100>
-    }
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z+severity> ))
-        return <targetPos.x, targetPos.y, targetPos.z+severity>
-
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z-severity> ))
-        return <targetPos.x, targetPos.y, targetPos.z-severity>
-
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y+severity, targetPos.z> ))
-        return <targetPos.x, targetPos.y+severity, targetPos.z>
-
-    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y-severity, targetPos.z> ))
-        return <targetPos.x, targetPos.y-severity, targetPos.z>
-
-        
-    if(!PlayerPosInSolid( player, <targetPos.x+severity, targetPos.y, targetPos.z> ))
-        return <targetPos.x+severity, targetPos.y, targetPos.z>
-
-    if(!PlayerPosInSolid( player, <targetPos.x-severity, targetPos.y, targetPos.z> ))
-        return <targetPos.x-severity, targetPos.y, targetPos.z>
-
-    return FindNearestSafeTeleport(player, targetPos, severity+10)
-}
