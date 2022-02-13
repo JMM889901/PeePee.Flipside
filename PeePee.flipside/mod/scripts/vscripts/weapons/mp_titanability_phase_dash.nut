@@ -44,22 +44,7 @@ var function OnWeaponPrimaryAttack_titanability_phase_dash( entity weapon, Weapo
 				}
 				else{
 					#if SERVER
-					EmitSoundOnEntityExceptToPlayer( player, player, "Stryder.Dash" )
-					//-210, 130
-					entity weaponOwner = weapon.GetWeaponOwner()
-					vector origin = weaponOwner.GetOrigin()
-					vector TargetPos = < -210+(-210-origin.x), 130+(130-origin.y), origin.z+10>
-					if(PlayerPosInSolid(weaponOwner, TargetPos)){
-						TargetPos = FindNearestSafeTeleport(weaponOwner, TargetPos, 10)
-						}
-					weaponOwner.SetOrigin(TargetPos)
-					vector Angles = weaponOwner.GetAngles()
-					if(Angles.y > 180){
-						weaponOwner.SetAngles(<Angles.x, Angles.y-180, Angles.z>)}
-					else{
-						weaponOwner.SetAngles(<Angles.x, Angles.y+180, Angles.z>)}
-					vector Velocity = weaponOwner.GetVelocity()
-					weaponOwner.SetVelocity(<Velocity.x*-1, Velocity.y*-1, Velocity.z>)
+					TeleportPlayer(weapon, player)
 					#endif
 					return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 					}

@@ -15,5 +15,8 @@
 				"After": "flipside_init"
 			}
 		}
-    ]
+    ],
+		"Localisation": [
+		"resource/Flipside_localisation_%language%.txt"
+	]
 }

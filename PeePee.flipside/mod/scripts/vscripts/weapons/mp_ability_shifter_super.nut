@@ -8,24 +8,30 @@ const SHIFTER_SUPER_DURATION = 999999
 var function OnWeaponPrimaryAttack_shifter_super( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
     if(GetCurrentPlaylistVarInt("Flipside", 0) == 1){
+        float warmupTime = SHIFTER_SUPER_WARMUP_TIME
+        if ( weapon.HasMod( "short_shift" ) )
+        {
+            warmupTime = SHIFTER_SUPER_WARMUP_TIME_FAST
+        }
+        if ( weapon.HasMod( "short_shift" ) )
+        {
+            warmupTime = SHIFTER_SUPER_WARMUP_TIME_FAST
+        }
         #if SERVER
 //-205, 130
-	entity weaponOwner = weapon.GetWeaponOwner()
-    vector origin = weaponOwner.GetOrigin()
-        vector TargetPos = < -210+(-210-origin.x), 130+(130-origin.y), origin.z+10>
-        if(PlayerPosInSolid(weaponOwner, TargetPos)){
-            TargetPos = FindNearestSafeTeleport(weaponOwner, TargetPos, 1)
-            }
-        weaponOwner.SetOrigin(TargetPos)
-        vector Angles = weaponOwner.GetAngles()
-        if(Angles.y > 180){
-            weaponOwner.SetAngles(<Angles.x, Angles.y-180, Angles.z>)}
-        else{
-            weaponOwner.SetAngles(<Angles.x, Angles.y+180, Angles.z>)}
-        vector Velocity = weaponOwner.GetVelocity()
-        weaponOwner.SetVelocity(<Velocity.x*-1, Velocity.y*-1, Velocity.z>)
+        entity weaponOwner = weapon.GetWeaponOwner()
+        int phaseResult = PhaseShift( weaponOwner, 0, 0.2 )
+        if ( phaseResult )
+        {
+            PlayerUsedOffhand( weaponOwner, weapon )
+            #if BATTLECHATTER_ENABLED && SERVER
+                TryPlayWeaponBattleChatterLine( weaponOwner, weapon )
+            #endif
+            TeleportPlayer(weapon, weaponOwner)
+            return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+        }
         #endif
-        return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+    
     }
 
     else{

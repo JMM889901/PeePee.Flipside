@@ -1,11 +1,18 @@
 global function flipside_init
+#if SERVER
 global function FindNearestSafeTeleport
+global function TeleportPlayer
+#endif
 void function flipside_init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_FLIPSIDE", "Flipside", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
+    AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_FLIPSIDE", "WallLocation", ["#SETTING_DISABLED", "#VERTICAL", "#HORIZONTAL"], "0")
 	#if SERVER
 		AddCallback_OnPlayerRespawned(OnPlayerRespawn)
         AddClientCommandCallback("!Stuck", UnstuckPlayer)
+        AddClientCommandCallback("!stuck", UnstuckPlayer)
+        AddClientCommandCallback("!STUCK", UnstuckPlayer)
         AddCallback_PlayerClassChanged(OnPlayerRespawn)
+        AddCallback_OnPlayerGetsNewPilotLoadout( OnPlayerChangeLoadout)
 	#endif
 }
 bool function FlipsideEnabled(){
@@ -15,20 +22,23 @@ bool function FlipsideEnabled(){
 void function OnPlayerRespawn(entity player){
     if(FlipsideEnabled()){
 		if(player.GetOffhandWeapons().len() != 0){
-	        if(!player.IsTitan() && !PlayerHasWeapon( player, "mp_ability_shifter_super" )){
+	        if(!player.IsTitan() && !PlayerHasWeapon( player, "mp_ability_shifter_super" ) && !PlayerHasWeapon(player, "mp_titanability_phase_dash")){
                 player.TakeWeaponNow(player.GetOffhandWeapons()[OFFHAND_RIGHT].GetWeaponClassName())
                 player.GiveOffhandWeapon("mp_ability_shifter_super", OFFHAND_RIGHT)}
-	else if(player.IsTitan() && !PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
-	player.TakeWeaponNow(player.GetOffhandWeapons()[2].GetWeaponClassName())
-        player.GiveOffhandWeapon("mp_titanability_phase_dash", 1, ["fd_phase_charges"])}
-    else if(player.IsTitan() && PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
-        if(!player.GetOffhandWeapons()[2].HasMod("fd_phase_charges")){
-            player.TakeWeaponNow("mp_titanability_phase_dash")
-            player.GiveOffhandWeapon("mp_titanability_phase_dash", 1, ["fd_phase_charges"])
+            else if(player.IsTitan() && !PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
+                player.TakeWeaponNow(player.GetOffhandWeapons()[2].GetWeaponClassName())
+                player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])}
+            else if(player.IsTitan() && PlayerHasWeapon( player, "mp_titanability_phase_dash" )){
+                if(!player.GetOffhandWeapons()[2].HasMod("fd_phase_charges")){
+                    player.TakeWeaponNow("mp_titanability_phase_dash")
+                    player.GiveOffhandWeapon("mp_titanability_phase_dash", 2, ["fd_phase_charges"])
         }
     }
 	}
     }
+}
+void function OnPlayerChangeLoadout(entity player, PilotLoadoutDef loadout){
+    OnPlayerRespawn(player)
 }
 bool function UnstuckPlayer(entity player, array<string> args){
     print("Player " + player.GetUID + " Used Unstuck at " + player.GetOrigin())
@@ -36,8 +46,9 @@ bool function UnstuckPlayer(entity player, array<string> args){
     return true
 }
 
+
 vector function FindNearestSafeTeleport(entity player, vector targetPos, int severity){
-    if(severity >= 500){
+    if(severity >= 250){
         print("problem")
        return <1000,1000,100>
     }
@@ -60,6 +71,42 @@ vector function FindNearestSafeTeleport(entity player, vector targetPos, int sev
     if(!PlayerPosInSolid( player, <targetPos.x-severity, targetPos.y, targetPos.z> ))
         return <targetPos.x-severity, targetPos.y, targetPos.z>
 
-    return FindNearestSafeTeleport(player, targetPos, severity+1)
+    return FindNearestSafeTeleport(player, targetPos, severity+5)
 }
+bool function PlayerPosInSolid( entity player, vector targetPos )
+{
+    int solidMask = TRACE_MASK_PLAYERSOLID
+    vector mins
+    vector maxs
+    int collisionGroup = TRACE_COLLISION_GROUP_PLAYER
+    array<entity> ignoreEnts = []
+    ignoreEnts.append( player ) //in case we want to check player's current pos
+    TraceResults result
+
+    mins = player.GetPlayerMins()
+    maxs = player.GetPlayerMaxs()
+    result = TraceHull( targetPos, targetPos + Vector( 0, 0, 1), mins, maxs, ignoreEnts, solidMask, collisionGroup )
+    if ( result.startSolid )
+        return true
+
+    return false
+
+}
+int function TeleportPlayer(entity weapon, entity weaponOwner){
+    vector origin = weaponOwner.GetOrigin()
+    vector TargetPos = < -192.0005+(-192.0005-origin.x), 127.995+(127.995-origin.y), origin.z+2>
+    if(PlayerPosInSolid(weaponOwner, TargetPos)){
+        TargetPos = FindNearestSafeTeleport(weaponOwner, TargetPos, 1)
+        }
+    weaponOwner.SetOrigin(TargetPos)
+    vector Angles = weaponOwner.EyeAngles()
+    if(Angles.y > 180){
+        weaponOwner.SetAngles(<Angles.x, Angles.y-180, Angles.z>)}
+    else{
+        weaponOwner.SetAngles(<Angles.x, Angles.y+180, Angles.z>)}
+    vector Velocity = weaponOwner.GetVelocity()
+    weaponOwner.SetVelocity(<Velocity.x*-1, Velocity.y*-1, Velocity.z>)
+    return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+}
+
 #endif
