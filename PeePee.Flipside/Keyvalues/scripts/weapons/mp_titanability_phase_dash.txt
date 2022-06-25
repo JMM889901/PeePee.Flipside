@@ -1,0 +1,9 @@
+WeaponData
+{
+	Mods
+	{
+		rapid_rearm
+		{
+		}
+	}
+}
