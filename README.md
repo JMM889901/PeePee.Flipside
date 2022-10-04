@@ -17,3 +17,6 @@ Support for deck, custom map included (made by Zia )
 technically supports all lf maps, no promises
 
 added check for if player disconnects 0.2 seconds after tp
+
+Download on thunderstore or here
+https://northstar.thunderstore.io/package/The_Peepeepoopoo_man/FlipSide/
