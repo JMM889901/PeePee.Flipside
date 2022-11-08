@@ -1,8 +1,18 @@
+untyped
 global function flipside_init
 #if SERVER
 global function FindNearestSafeTeleport
 global function TeleportPlayer
 #endif
+
+
+
+const FlipY = 1 
+const FlipX = 2 
+const Mirror = 3
+const UpDown = 4
+const UpDownFlip = 5
+
 void function flipside_init() {
 	AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_FLIPSIDE", "Flipside", ["#SETTING_DISABLED", "#SETTING_ENABLED"], "0")
     AddPrivateMatchModeSettingEnum("#MODE_SETTING_CATEGORY_FLIPSIDE", "WallLocation", ["#SETTING_DISABLED","#GLITCHTIMEWARP", "#VERTICAL", "#HORIZONTAL"], "0")
@@ -21,6 +31,11 @@ void function flipside_init() {
         PrecacheParticleSystem ($"P_smokescreen_FD")
 	#endif
 }
+
+
+
+
+
 vector function GetMapOrigin(){
         switch(GetMapName()){
             case "mp_glitch":
@@ -33,6 +48,8 @@ vector function GetMapOrigin(){
                 return <254.001, 205, 0>
             case "mp_lf_traffic":
                 return  <254.001, 205, 0>
+            case "mp_mirror_city":
+                return <0,0,0>
     }
     return<254.001, 205, 0>
 }
@@ -44,8 +61,18 @@ int function GetRotateAxis(){
             return 1
         case "mp_lf_traffic":
             return  1
+        case "mp_mirror_city":
+            return 5
 }
 return 1
+}
+int function GetUpDownOffset()
+{
+    switch(GetMapName()){
+        case "mp_mirror_city":
+            return 6736 //Unused
+    }
+    return 0
 }
 bool function FlipsideEnabled(){
     return GetCurrentPlaylistVarInt("Flipside", 0) == 1
@@ -388,15 +415,15 @@ bool function UnstuckPlayer(entity player, array<string> args){
 
 
 vector function FindNearestSafeTeleport(entity player, vector targetPos, int severity){
-    if(severity >= 250){
+    if(severity >= 500){
         print("problem")
-       return <3000,2200,100>
+       return GetMapOrigin()
     }
-    //if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z+severity> ))
-       // return <targetPos.x, targetPos.y, targetPos.z+severity>
+    //itsif(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z+severity> ))
+    //its    return <targetPos.x, targetPos.y, targetPos.z+severity>
 
-    //if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z-severity> ))
-        //return <targetPos.x, targetPos.y, targetPos.z-severity>
+    if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y, targetPos.z-severity> ))
+        return <targetPos.x, targetPos.y, targetPos.z-severity>
 
     if(!PlayerPosInSolid( player, <targetPos.x, targetPos.y+severity, targetPos.z> ))
         return <targetPos.x, targetPos.y+severity, targetPos.z>
@@ -466,20 +493,49 @@ void function TeleportPlayer(entity ornull weapon, entity weaponOwner){
         weaponOwner.kv.airAcceleration = 0}
 
     vector TargetPos
-    if(GetRotateAxis() == 1)
+    int axis = GetRotateAxis()
+    if(axis == FlipY)
+    {
         TargetPos = < origin.x, GetMapOrigin().y+(GetMapOrigin().y-origin.y), origin.z+2>
-    if(GetRotateAxis() == 2)
+        Angles.y = Angles.y - (180.0 + 2*(Angles.y-90))
+        Velocity.y = Velocity.y * -1
+    }
+    if(axis == FlipX)
+    {
         TargetPos = < GetMapOrigin().x+(GetMapOrigin().x-origin.x), origin.y, origin.z+2>
-    if(GetRotateAxis() == 3)
+        Angles.y = Angles.y - (180.0 + 2*Angles.y)
+        Velocity.x = Velocity.x * -1
+    }
+    if(axis == Mirror)
+    {
         TargetPos = < GetMapOrigin().x+(GetMapOrigin().x-origin.x), GetMapOrigin().y+(GetMapOrigin().y-origin.y), origin.z+2>
+        Angles.y = Angles.y - 180.0
+        Velocity.x = Velocity.x * -1
+        Velocity.y = Velocity.y * -1
+    }
+    if(axis == UpDown)
+    {
+        if(origin.z > GetMapOrigin().z)
+            TargetPos = < origin.x, origin.y, (origin.z - GetUpDownOffset()) + 2>
+        else
+            TargetPos = < origin.x, origin.y, (origin.z + GetUpDownOffset()) + 2>
+    }
+    if(axis == UpDownFlip)
+    {
+        TargetPos = <origin.x , origin.y,GetMapOrigin().z+(GetMapOrigin().z-origin.z)- 50>
+    }
+    Angles.y = Angles.y%360
     if(PlayerPosInSolid(weaponOwner, TargetPos))
     {
         TargetPos = FindNearestSafeTeleport(weaponOwner, TargetPos, 1)
     }
     weaponOwner.SetOrigin(TargetPos)
+
+    weaponOwner.SetAngles(Angles)
     
-    weaponOwner.SetAngles(<Angles.x, (Angles.y- (GetRotateAxis() == 1 ? 180.0 + 2*(Angles.y-90) : ((GetRotateAxis() == 3) ? 180.0 : 180.0 + 2*Angles.y)))%360, Angles.z>)
-    weaponOwner.SetVelocity(<Velocity.x*(GetRotateAxis() == 1 ? 1 : -1), Velocity.y*(GetRotateAxis() == 2 ? 1 : -1), Velocity.z>)
+    weaponOwner.SetVelocity(Velocity)
+
+    //Air accel fix stuff, very scuffed
     if(expect string(weaponOwner.kv.airAcceleration).tofloat() < airaccel)
         thread RestoreAirAccel(airaccel, weaponOwner)
 }
