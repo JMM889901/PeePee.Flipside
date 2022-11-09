@@ -3,6 +3,12 @@
 	"Description" : "Flipside Gamemode",
 	"Version": "0.1.0",
 	"LoadPriority": 5,
+	"ConVars": [
+		{
+			"Name": "Flipside",
+			"DefaultValue": "0"
+		}
+	],
 	"Scripts": [
 		{
 			"Path": "flipside.gnut",

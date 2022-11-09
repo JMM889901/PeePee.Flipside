@@ -75,7 +75,7 @@ int function GetUpDownOffset()
     return 0
 }
 bool function FlipsideEnabled(){
-    return GetCurrentPlaylistVarInt("Flipside", 0) == 1
+    return GetCurrentPlaylistVarInt("Flipside", 0) == 1 || GetConVarInt("Flipside") == 1
 }
 void function OnStart(){
     #if SERVER

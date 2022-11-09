@@ -7,7 +7,7 @@ const SHIFTER_SUPER_DURATION = 999999
 //<2745.16, 1774, 25.8693>  <2563.61, 2097.9, 268.031>
 var function OnWeaponPrimaryAttack_shifter_super( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
-    if(GetCurrentPlaylistVarInt("Flipside", 0) == 1){
+    if(FlipsideEnabled()){
         float warmupTime = SHIFTER_SUPER_WARMUP_TIME
         if ( weapon.HasMod( "short_shift" ) )
         {
@@ -27,7 +27,9 @@ var function OnWeaponPrimaryAttack_shifter_super( entity weapon, WeaponPrimaryAt
             #if BATTLECHATTER_ENABLED && SERVER
                 TryPlayWeaponBattleChatterLine( weaponOwner, weapon )
             #endif
+            #if MP
             TeleportPlayer(weapon, weaponOwner)
+            #endif
             return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
         }
         #endif
@@ -90,6 +92,9 @@ bool function PlayerPosInSolid( entity player, vector targetPos )
 
     return false
 
+}
+bool function FlipsideEnabled(){
+    return GetCurrentPlaylistVarInt("Flipside", 0) == 1 || GetConVarInt("Flipside") == 1
 }
 
 //script GetPlayerArray()[0].SetOrigin(< -205 + (-205.0 - GetPlayerArray()[0].GetOrigin().x), 127 + (127 - GetPlayerArray()[0].GetOrigin().y) ,500>)
