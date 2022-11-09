@@ -21,7 +21,7 @@ var function OnWeaponPrimaryAttack_titanability_phase_dash( entity weapon, Weapo
 			if ( player.IsPlayer() )
 			{
 				PlayerUsedOffhand( player, weapon )
-				if(GetCurrentPlaylistVarInt("Flipside", 0) == 0){
+				if(FlipsideEnabled()){
 				#if SERVER
 					EmitSoundOnEntityExceptToPlayer( player, player, "Stryder.Dash" )
 					thread PhaseDash( weapon, player )
@@ -43,7 +43,7 @@ var function OnWeaponPrimaryAttack_titanability_phase_dash( entity weapon, Weapo
 				#endif
 				}
 				else{
-					#if SERVER
+					#if SERVER && MP
 					TeleportPlayer(weapon, player)
 					#endif
 					return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
@@ -117,4 +117,7 @@ bool function PlayerPosInSolid( entity player, vector targetPos )
 
     return false
 
+}
+bool function FlipsideEnabled(){
+    return GetCurrentPlaylistVarInt("Flipside", 0) == 1 || GetConVarInt("Flipside") == 1
 }
