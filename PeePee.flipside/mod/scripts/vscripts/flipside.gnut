@@ -540,9 +540,10 @@ void function TeleportPlayer(entity ornull weapon, entity weaponOwner){
         thread RestoreAirAccel(airaccel, weaponOwner)
 }
 void function RestoreAirAccel(float airaccel, entity player){
-    if(IsValid(player)){
     wait 0.2
-    player.kv.airAcceleration = airaccel}
+    if(IsValid(player)){
+    	player.kv.airAcceleration = airaccel
+	}
 }
 
 
